@@ -109,10 +109,16 @@ bottom-up path. If it drops much further, P2 was held back by its init and
 the architecture is worth more than the tie suggests.
 
 **Setup.** `baseline_640_partial`: `baseline_640` with `transfer_upto: 16`.
-RTX 4090, `cuda24` profile.
+RTX 4090 (48 GB variant), `cuda24` profile, so batch 8 as before.
 
-**Result.** _to fill in_
+**Result.** 0.2062 mAP50-95 (0.3589 mAP50), 7.0% below `baseline_640`.
+`p2_640` is +6.9% over this control, with the gain tracking object size
+(r = −0.76). The init cost is flat across sizes (r = −0.19).
 
-**Reading.** _to fill in_
+**Reading.** Wrong. The partial init cost more than expected, and it was
+masking a real P2 gain. Plateauing early showed P2 had converged, not that it
+converged to the same place. P2 helps small objects without hurting large
+ones, but is still ~6x weaker than resolution.
 
-**Next.** _to fill in_
+**Next.** A second seed for `baseline_640_partial` and `p2_640` to put an
+error bar on the 0.014 gap.

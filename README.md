@@ -12,10 +12,9 @@ with the reasoning written down in [`docs/`](docs/).
 
 ## Results
 
-> **Status:** resolution, capacity, tiling and P2 experiments are done. One
-> control run for the P2 result (`baseline_640_partial`, see
-> [docs/02](docs/02-resolution-and-stride.md)) is pending. The commands that
-> produce every number are the ones in this README.
+> **Status:** resolution, capacity, tiling and P2 experiments are done,
+> including an init-matched control for P2. The commands that produce every
+> number are the ones in this README.
 
 All runs: 50 epochs, VisDrone `val`, constant `batch: 8` on one RTX 4090.
 
@@ -77,23 +76,28 @@ area. If cell density were the mechanism, they should score alike:
 They don't. `p2_640` fell 32.5% short of the model with the matching grid and
 landed within 0.6% of the plain 640 baseline — for 4× the training memory.
 
-That aggregate hides the interesting part. Per class, P2's delta against the
-640 baseline correlates with object size at **r = −0.74**: the smallest four
-classes gain (+0.013 mean), the largest six lose (−0.012), and they cancel.
-The extra head acts on the predicted mechanism — it is just ~15× weaker than
-resolution and pays for the gain by degrading larger objects, which resolution
-never does.
+**But that tie was partly an init effect.** Adding the P2 branch shifts the
+head's layer indices, so `p2_640` only gets COCO weights for layers 0-16. A
+stock model given the same partial start (`baseline_640_partial`) scores
+0.2062, 7% below the fully pretrained baseline. Against that matched control:
 
-So cell density is a real but minor part of the mechanism, not the mechanism. The P2 map branches off backbone
-layer 2, so it is fine-grained but semantically shallow: it can localise
-without recognising. Resolution instead enlarges the object at *every* level
-of the hierarchy, which is what lets deep features resolve it. Fine grids are
-not the scarce resource; fine grids **carrying deep features** are.
+| run | init | mAP50-95 | small-4 AP50 Δ | large-6 AP50 Δ |
+| --- | --- | ---: | ---: | ---: |
+| `baseline_640_partial` | layers 0-16 | 0.2062 | — | — |
+| `p2_640` | layers 0-16 | 0.2204 | **+0.031** | +0.010 |
 
-That also explains the tiling result below — tiling raises effective
-resolution, so it helps a starved model; P2 raises only grid density, so it
-helps nothing. Initialisation caveat and the follow-up experiment in
-[docs/02](docs/02-resolution-and-stride.md).
+P2 is worth **+6.9%**, and the gain concentrates in the smallest classes
+(r = −0.76 with object size). The init cost itself is flat across sizes
+(r = −0.19), which is why it hid the shape of P2's effect. The earlier reading
+that P2 trades away large objects was wrong: that loss was the init handicap.
+
+So cell density is a real part of the mechanism, but a minor one. P2's
+small-object gain is about 6× smaller than what 640 → 1280 buys (+0.198). The
+P2 map branches off backbone layer 2, so it is fine-grained but semantically
+shallow: it can localise without recognising. Resolution instead enlarges the
+object at *every* level of the hierarchy, which is what lets deep features
+resolve it. Fine grids help; fine grids **carrying deep features** help far
+more. Details in [docs/02](docs/02-resolution-and-stride.md).
 
 ### The mechanism holds up
 

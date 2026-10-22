@@ -154,6 +154,10 @@ detection level appears to cost something on larger objects, plausibly through
 label assignment being redistributed across four heads with the shallowest one
 handling cases P3 previously owned.
 
+> **Corrected below.** With init matched, the large-class loss disappears and
+> the gap to resolution is about 6x, not 15x. See
+> [the init control](#result-the-init-handicap-was-hiding-p2s-gain).
+
 ### Why it fails
 
 The P2 map is fine, but its features are shallow. It branches off backbone
@@ -169,7 +173,8 @@ the scarce resource; **fine grids carrying deep features** are.
 This also explains why tiled inference behaved the way it did in
 [doc 03](03-tiled-inference.md). Tiling raises effective resolution — objects
 land on the network at native scale — so it helps a resolution-starved model.
-P2 does not raise resolution, only grid density, and so it helps nothing.
+P2 does not raise resolution, only grid density, and so it helps far less
+(+6.9% once its init is matched, against +58% for 1280 over the same control).
 
 ### The confound, stated plainly
 
@@ -192,6 +197,7 @@ climbing at epoch 50. It was not:
 | --- | ---: | ---: | ---: | ---: |
 | `baseline_640` | 40 | 0.2211 | −0.0032 | 10 ep |
 | `p2_640` | **37** | 0.2197 | −0.0016 | **13 ep** |
+| `baseline_640_partial` | 40 | 0.2056 | −0.0016 | 10 ep |
 | `finetune_1280` | 34 | 0.3246 | −0.0035 | 16 ep |
 
 `p2_640` peaked *earlier* than the baseline it tied with, and had been flat for
@@ -211,4 +217,51 @@ in shape, without the conv weights around them. So
 [`baseline_640_partial`](../configs/baseline_640_partial.yaml) keeps
 pretrained weights for layers 0-16 of the stock model and resets the rest.
 
-**Result:** _pending_
+### Result: the init handicap was hiding P2's gain
+
+I expected the partial start to cost little, since `p2_640` had plateaued by
+epoch 37. It cost 7%:
+
+| run | init | mAP50-95 | mAP50 |
+| --- | --- | ---: | ---: |
+| `baseline_640` | full | 0.2218 | 0.3797 |
+| `baseline_640_partial` | layers 0-16 | 0.2062 | 0.3589 |
+| `p2_640` | layers 0-16 | 0.2204 | — |
+
+Plateauing showed `p2_640` had converged, not that it converged to the same
+place a full init would. The partial baseline plateaued too (best at epoch
+40, flat for the last 10), so this is a worse optimum rather than a slower
+one: more epochs would not close it. Against the matched control, P2 is
+worth +6.9%.
+
+Per class (AP50):
+
+| class | median side | partial | P2 | P2 − partial | partial − full |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| people | 16.7 px | 0.285 | 0.323 | **+0.038** | −0.019 |
+| pedestrian | 17.2 px | 0.397 | 0.440 | **+0.043** | −0.016 |
+| motor | 20.0 px | 0.416 | 0.450 | **+0.034** | −0.027 |
+| bicycle | 20.8 px | 0.112 | 0.121 | +0.009 | −0.012 |
+| tricycle | 28.4 px | 0.236 | 0.255 | +0.019 | −0.032 |
+| awning-tricycle | 29.3 px | 0.104 | 0.112 | +0.008 | −0.023 |
+| car | 32.5 px | 0.769 | 0.796 | +0.027 | −0.007 |
+| van | 33.6 px | 0.414 | 0.415 | +0.001 | −0.016 |
+| bus | 35.2 px | 0.494 | 0.511 | +0.017 | −0.033 |
+| truck | 38.6 px | 0.362 | 0.352 | −0.010 | −0.023 |
+
+- **P2's gain tracks object size** (r = −0.76): +0.031 for the smallest four
+  classes, +0.010 for the largest six.
+- **The init cost does not** (r = −0.19): −0.018 small, −0.022 large.
+
+That corrects two claims above. P2 does not trade away large objects; the
+−0.012 on large classes was the init cost landing on top of a small positive
+effect. And its small-object gain is about 6x weaker than resolution's
+(+0.031 vs +0.198), not 15x.
+
+The main conclusion stands with a different magnitude: grid density is a real
+part of what resolution provides, but a minor one. `p2_640` is still 32.5%
+below `finetune_1280` with the same finest grid.
+
+One seed per run, so differences of a few thousandths per class are within
+noise. The aggregate gap (0.014 mAP50-95) and the size correlation are the
+parts worth trusting.
