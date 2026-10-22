@@ -18,6 +18,17 @@ def test_baseline_and_finetune_differ_only_in_resolution():
     assert (baseline.imgsz, finetune.imgsz) == (640, 960)
 
 
+def test_partial_baseline_differs_only_in_transfer():
+    """Otherwise the p2_640 comparison would confound init with something else."""
+    baseline = load_config("baseline_640")
+    partial = load_config("baseline_640_partial")
+
+    assert (baseline.transfer_upto, partial.transfer_upto) == (None, 16)
+    partial.transfer_upto = None
+    partial.name, partial.notes = baseline.name, baseline.notes
+    assert partial == baseline
+
+
 def test_extends_deep_merges_train_args():
     """A child overriding one hyperparameter must not drop its siblings."""
     smoke = load_config("smoke")

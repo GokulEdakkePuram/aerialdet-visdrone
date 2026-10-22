@@ -29,6 +29,10 @@ class ExperimentConfig:
     # custom architecture starts from random init, which would make any
     # comparison against a pretrained baseline meaningless.
     pretrained: str = ""
+    # Keep pretrained weights only for layers 0..transfer_upto and reset the
+    # rest to random init. Used to give a stock model the same partial
+    # transfer a custom head gets, so the two start from the same place.
+    transfer_upto: int | None = None
     data: str = "VisDrone.yaml"
     epochs: int = 50
     imgsz: int = 960

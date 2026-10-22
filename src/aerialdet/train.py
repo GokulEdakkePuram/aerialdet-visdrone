@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import copy
 import json
 import time
 from dataclasses import asdict
@@ -12,6 +13,19 @@ from .config import ExperimentConfig, load_config
 from .hardware import detect
 from .paths import RUNS_DIR, configure_ultralytics
 from .tracking import configure as configure_tracking
+
+
+def reset_layers_after(model: Any, last: int) -> int:
+    """Re-initialise every layer with index greater than ``last``.
+
+    The fresh values come from building the same architecture again, so they
+    are exactly what Ultralytics would use for a layer it could not transfer.
+    Returns the number of state-dict items that were reset.
+    """
+    fresh = type(model)(copy.deepcopy(model.yaml), verbose=False).state_dict()
+    reset = {k: v for k, v in fresh.items() if int(k.split(".")[1]) > last}
+    model.load_state_dict(reset, strict=False)
+    return len(reset)
 
 
 def train(
@@ -45,6 +59,9 @@ def train(
         # Matching layers transfer by shape and name; the rest stay random.
         print(f"[aerialdet] transferring weights from {cfg.pretrained}")
         model = model.load(cfg.pretrained)
+    if cfg.transfer_upto is not None:
+        n = reset_layers_after(model.model, cfg.transfer_upto)
+        print(f"[aerialdet] kept pretrained layers 0-{cfg.transfer_upto}, reset {n} items after")
     kwargs = cfg.to_train_kwargs()
     kwargs.setdefault("project", str(RUNS_DIR / "train"))
 

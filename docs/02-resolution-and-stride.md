@@ -83,8 +83,8 @@ worth it" is a weaker claim on hardware where 1280 is nearly free.
 
 - Whether the gain tracks *object size* or just *more pixels of context* —
   separable by evaluating the 640-trained model at 960 without retraining.
-- Whether P2 (stride-4) detection head helps more than raw resolution, at
-  lower cost.
+- ~~Whether a P2 (stride-4) detection head helps more than raw resolution, at
+  lower cost.~~ It does not; see Experiment 3 below.
 
 
 ## Experiment 3: is it the grid, or the pixels?
@@ -200,6 +200,15 @@ converged, and converged to the same place as the plain 640 baseline.
 
 What remains open is narrower: a partly random neck may have converged to a
 *worse optimum*, not merely a later one. Testing that means initialising
-`baseline_640` from the same 297/593 partial transfer and seeing whether it
-gives up the same ground. That is a real experiment, but it is no longer a
-plausible explanation for the whole effect.
+`baseline_640` from the same partial transfer and seeing whether it gives up
+the same ground. That is a real experiment, but it is no longer a plausible
+explanation for the whole effect.
+
+The transfer is easy to pin down. Of P2's 297 items, 288 are layers 0-16 (the
+backbone and the top-down neck, which keep their indices) and the other 9 are
+loose BatchNorm and bias tensors in layers 19, 20 and 22 that happen to match
+in shape, without the conv weights around them. So
+[`baseline_640_partial`](../configs/baseline_640_partial.yaml) keeps
+pretrained weights for layers 0-16 of the stock model and resets the rest.
+
+**Result:** _pending_

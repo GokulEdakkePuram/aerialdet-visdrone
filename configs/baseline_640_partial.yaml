@@ -1,0 +1,10 @@
+# baseline_640 with the same partial transfer p2_640 started from.
+#
+# Adding the P2 branch shifts every head index after layer 16, so p2_640 only
+# gets pretrained weights for the backbone and the top-down neck (layers
+# 0-16). The bottom-up path and Detect start random. This run gives the stock
+# head that same start, so p2_640 vs this isolates the architecture.
+extends: baseline_640
+name: baseline_640_partial
+transfer_upto: 16
+notes: "Stock head, pretrained layers 0-16 only, matching p2_640's transfer."
