@@ -25,23 +25,6 @@ explanation, and what would distinguish between the candidates?
 
 ---
 
-## 2026-08-28 — Pipeline smoke test
-
-**Question.** Does the whole path — download, convert, train, validate, export
-— actually run end to end before any real compute is committed to it?
-
-**Expectation.** Yes, with meaningless metrics (1 epoch on 2% of the data).
-
-**Setup.** `configs/smoke.yaml`, YOLO11n, 640 px, MPS on an M2 Pro (16 GB).
-
-**Result.** _to fill in_
-
-**Reading.** _to fill in_
-
-**Next.** `baseline_640`, the control for the resolution ablation.
-
----
-
 The entries below were written up after the runs, from the README and docs.
 The expectations are the ones the docs committed to before each run.
 
