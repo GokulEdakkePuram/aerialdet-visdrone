@@ -12,11 +12,12 @@ with the reasoning written down in [`docs/`](docs/).
 
 ## Results
 
-> **Status:** pipeline complete and tested; training runs in progress. Numbers
-> below are filled in from `reports/results.md` as runs finish, and the
-> commands that produce them are the ones in this README.
+> **Status:** resolution, capacity, tiling and P2 experiments are done. One
+> control run for the P2 result (`baseline_640_partial`, see
+> [docs/02](docs/02-resolution-and-stride.md)) is pending. The commands that
+> produce every number are the ones in this README.
 
-All five runs: 50 epochs, VisDrone `val`, constant `batch: 8` on one RTX 4090.
+All runs: 50 epochs, VisDrone `val`, constant `batch: 8` on one RTX 4090.
 
 **Resolution** (`yolo11s`, only `imgsz` varies):
 
@@ -127,8 +128,8 @@ percentage gains regardless of why. Absolute gain removes that confound, and
 it is the measure that gives r = −0.88. The headline survives the stricter
 test; it would have been overstated by the looser one.
 
-**The two axes buy almost the same thing.** `yolo11m` at 960 (0.3272) and
-`yolo11s` at 1280 (0.3246) are within 0.8% of each other, for 1.7 h and 1.8 h
+**The two axes buy almost the same thing.** `yolo11m` at 960 (0.3203) and
+`yolo11s` at 1280 (0.3260) are within 1.8% of each other, for 1.7 h and 1.8 h
 respectively. Spending on resolution and spending on capacity are close to
 interchangeable here — which is not what the small-object argument alone would
 predict, and is the most interesting thing in the table.
