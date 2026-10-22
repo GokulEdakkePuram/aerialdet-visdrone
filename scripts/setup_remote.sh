@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Provision a freshly rented GPU box for training.
 #
-#   curl -fsSL https://raw.githubusercontent.com/GokulEdakkePuram/ObjectDetection-DroneImagery/main/scripts/setup_remote.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/GokulEdakkePuram/aerialdet-visdrone/main/scripts/setup_remote.sh | bash
 #
 # Assumes an Ubuntu image with an NVIDIA driver already present (any of the
 # PyTorch or CUDA templates on vast.ai / RunPod). Everything Python-side comes
@@ -9,7 +9,7 @@
 # on.
 set -euo pipefail
 
-REPO_URL="${REPO_URL:-https://github.com/GokulEdakkePuram/ObjectDetection-DroneImagery.git}"
+REPO_URL="${REPO_URL:-https://github.com/GokulEdakkePuram/aerialdet-visdrone.git}"
 WORKDIR="${WORKDIR:-$HOME/aerialdet}"
 
 echo "==> Checking for a GPU"

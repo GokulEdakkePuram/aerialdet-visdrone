@@ -249,7 +249,7 @@ On a rented GPU, provision with one command and calibrate before spending
 hours — see [docs/06](docs/06-running-on-rented-gpus.md):
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/GokulEdakkePuram/ObjectDetection-DroneImagery/main/scripts/setup_remote.sh | bash
+curl -fsSL https://raw.githubusercontent.com/GokulEdakkePuram/aerialdet-visdrone/main/scripts/setup_remote.sh | bash
 uv run aerialdet probe baseline_640 finetune_960 finetune_1280
 uv run aerialdet train finetune_960 --track wandb
 ```

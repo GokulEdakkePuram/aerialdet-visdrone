@@ -200,7 +200,7 @@ Three things that waste rentals:
 On any Ubuntu image with an NVIDIA driver:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/GokulEdakkePuram/ObjectDetection-DroneImagery/main/scripts/setup_remote.sh | bash
+curl -fsSL https://raw.githubusercontent.com/GokulEdakkePuram/aerialdet-visdrone/main/scripts/setup_remote.sh | bash
 ```
 
 It verifies the driver, warns about disk, installs uv, syncs from `uv.lock`
